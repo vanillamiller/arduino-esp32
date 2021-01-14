@@ -133,7 +133,7 @@ wl_status_t WiFiSTAClass::begin(const char* ssid, const char *passphrase, int32_
     wifi_config_t conf;
     memset(&conf, 0, sizeof(wifi_config_t));
     strcpy(reinterpret_cast<char*>(conf.sta.ssid), ssid);
-
+    conf.sta.listen_interval = 2000; // added to test power saving TODO: remove
     if(passphrase) {
         if (strlen(passphrase) == 64){ // it's not a passphrase, is the PSK
             memcpy(reinterpret_cast<char*>(conf.sta.password), passphrase, 64);
@@ -224,8 +224,8 @@ wl_status_t WiFiSTAClass::begin()
 }
 
 /**
- * will force a disconnect an then start reconnecting to AP
- * @return ok
+ * will force a disconnect and then start reconnecting to AP
+ * @return true when successful
  */
 bool WiFiSTAClass::reconnect()
 {
@@ -337,7 +337,7 @@ bool WiFiSTAClass::config(IPAddress local_ip, IPAddress gateway, IPAddress subne
 
 /**
  * is STA interface connected?
- * @return true if STA is connected to an AD
+ * @return true if STA is connected to an AP
  */
 bool WiFiSTAClass::isConnected()
 {
@@ -488,8 +488,8 @@ IPAddress WiFiSTAClass::dnsIP(uint8_t dns_no)
     if(WiFiGenericClass::getMode() == WIFI_MODE_NULL){
         return IPAddress();
     }
-    ip_addr_t dns_ip = dns_getserver(dns_no);
-    return IPAddress(dns_ip.u_addr.ip4.addr);
+    const ip_addr_t* dns_ip = dns_getserver(dns_no);
+    return IPAddress(dns_ip->u_addr.ip4.addr);
 }
 
 /**
